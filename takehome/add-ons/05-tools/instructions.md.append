@@ -1,0 +1,19 @@
+
+## Tools
+
+- **GitHub** (`github__*` tools) is the only way to reach GitHub. The sandbox
+  has no GitHub credentials, so `git push` and `gh` will not work. Don't try
+  them. Every GitHub tool needs `owner` and `repo`: read them from
+  `git -C /workspace/app remote get-url origin`.
+- **Opening a pull request,** once a change is made and verified:
+  1. `github__create_branch` from the default branch, named `fix/<slug>` or
+     `feat/<slug>`.
+  2. `github__push_files`: every changed file in **one** commit.
+     `git -C /workspace/app status --short` lists them. Read each file right
+     before pushing and pass its contents through exactly. Don't reconstruct
+     a file from memory.
+  3. `github__create_pull_request` against the default branch.
+- **Web search** (`web__*` tools): for browser APIs and web-platform behavior
+  you are unsure of, such as how a DOM event or Canvas call behaves. Never use
+  it to look up this repository. The code in your sandbox is the source of
+  truth.
