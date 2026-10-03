@@ -100,7 +100,7 @@ It has file tools, but no machine to run anything on. Remember this answer.
 ## Step 2: Give it a computer (sandbox)
 
 ```bash
-cp -R add-ons/02-sandbox/sandbox my-agent/
+cp -R add-ons/02-sandbox/sandbox my-agent/sandbox
 ```
 
 Nothing to write. Skim the two files:
@@ -224,7 +224,7 @@ tools you allowed in step 5?
 
 **Checkpoint:**
 
-> Add a key that toggles the ghost piece on and off. Use G.
+> Add a key that toggles the ghost piece on and off. Use G. Then write a PR for it.
 
 The run pauses with Approve / Reject. Reject it once and confirm no PR opens.
 Then say `OK, go ahead` and approve. **You now have your first PR in your
@@ -235,7 +235,7 @@ fork.**
 ## Step 7: Teach it procedures (skills)
 
 ```bash
-cp -R add-ons/07-skills/skills my-agent/
+cp -R add-ons/07-skills/skills my-agent/skills
 ```
 
 **TODO:** write `skills/add-a-feature/SKILL.md`, both its `description` and
