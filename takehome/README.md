@@ -31,7 +31,6 @@ For anything not covered here, see the
 - An **Anthropic API key**
 - [**uv**](https://docs.astral.sh/uv/getting-started/installation/)
 - A **GitHub** account
-- An account in the webinar **Slack workspace**: `<SLACK INVITE LINK>`
 
 ---
 
@@ -46,15 +45,13 @@ For anything not covered here, see the
    - *Permissions:* **Contents** read and write, and **Pull requests** read and
      write
 
-   The token's scope is Patch's real guardrail: it physically can't touch any
-   other repo.
 3. **Fill in `.env`.**
    ```bash
    cd my-agent
    uv sync
    cp .env.example .env
    ```
-   Fill in `LANGSMITH_API_KEY`, `LANGSMITH_WORKSPACE_ID`, `ANTHROPIC_API_KEY`,
+   Fill in `LANGSMITH_API_KEY`, `ANTHROPIC_API_KEY`,
    `PATCH_REPO` (your fork, like `octocat/simple-game`), and
    `MDA_DEV_PATCH_GITHUB` (the token).
 
@@ -62,8 +59,8 @@ For anything not covered here, see the
 
 ## How each step works
 
-Keep two terminals open: one in `takehome/` for copying, and one in
-`takehome/my-agent/` for `uv run mda dev`.
+Keep two terminals open: one in `takehome/` for copying (known henceforth as "**Terminal One**), and one in
+`takehome/my-agent/` for `uv run mda dev` (**Terminal Two**).
 
 1. **Copy** the step's add-on files into `my-agent/` (each step gives the
    commands).
@@ -83,6 +80,16 @@ Stuck? The finished file for every step is in `solution/`.
 
 ## Step 1: Run the bare agent
 
+As it is currently set up, the agent is completely bare. `my-agent/agent.py` defines the agent as:
+```python
+agent = define_deep_agent(
+    name="TODO",
+    model="anthropic:claude-sonnet-5",
+)
+```
+
+That's it. That means our agent is currently only a deep agent with a model and a harness. Nothing makes it special yet. We'll build up the MDA as we go.
+
 **TODO:** in `my-agent/agent.py`, give your agent a `name`.
 
 ```bash
@@ -91,19 +98,22 @@ uv run mda dev
 
 **Checkpoint:**
 
+In LangSmith Studio, go to the chat tab, and ask the following question:
+
 > What's in your workspace? And what versions of git and Node can you run?
 
-It has file tools, but no machine to run anything on. Remember this answer.
+The agent should indicate that it has tools, but it should not be able to name the versions of git and Node, because a sandbox has not yet configured. Let's add one.
 
 ---
 
-## Step 2: Give it a computer (sandbox)
+## Step 2: Give the agent a sandbox
 
+In **Terminal 1**, run:
 ```bash
 cp -R add-ons/02-sandbox/sandbox my-agent/sandbox
 ```
 
-Nothing to write. Skim the two files:
+Review the two files that were copied over:
 
 - `sandbox/__init__.py` declares the sandbox. The folder's presence is what
   turns it on: every conversation (thread) now gets its own isolated machine.
@@ -111,13 +121,19 @@ Nothing to write. Skim the two files:
   every conversation. It installs only tooling (git and Node), and every new
   thread starts from that snapshot.
 
-**Checkpoint:** restart `mda dev` (the first snapshot build can take a few
-minutes), then send the **same** query as step 1. This time it runs real
-commands.
+**Checkpoint:** In **Terminal Two** re-run `uv run mda dev`, then send the **same** query as step 1: 
+
+> What's in your workspace? And what versions of git and Node can you run?
+
+This time, the agent should return versions of git and Node that have been configured in its sandbox.
 
 ---
 
 ## Step 3: Get your fork into the sandbox (middleware)
+
+The agent will use the sandbox to write code and test it out. For this, the agent needs access to the codebase. We'll set that up by configuring middleware.
+
+In **Terminal One**, run the following commands:
 
 ```bash
 cp add-ons/03-checkout/config.py my-agent/
@@ -128,13 +144,10 @@ Skim the two files:
 
 - `config.py` is the only place in the project that names the repo. It reads
   `PATCH_REPO` from `.env`.
-- `middleware/checkout.py` clones your fork into the sandbox before the model
-  runs, once per thread. Cloning is plumbing, not judgment, so it's code
-  rather than a line in the prompt asking the model to do it. `runtime.backend`
-  is the thread's sandbox, which MDA adds for you.
+- `middleware/checkout.py` defines a deterministic routine that clones your fork into the sandbox before the model runs, once per thread. 
 
 **TODO (wiring):** unlike a sandbox, middleware is code, so `agent.py` has to
-import it. Add:
+import it. In `agent.py`, add:
 
 ```python
 from middleware.checkout import ensure_checkout
@@ -144,6 +157,8 @@ and pass `middleware=[ensure_checkout]` to `define_deep_agent`.
 
 **Checkpoint:**
 
+In **Terminal Two**, restart `uv run mda dev`, and in the chat, as the agent: 
+
 > What's in /workspace/app? Show me the latest commit.
 
 It should be **your fork**. In the trace, `ensure_checkout` runs before the
@@ -152,6 +167,10 @@ first model call, so the model never clones anything itself.
 ---
 
 ## Step 4: Give it a role (instructions)
+
+The agent could benefit from having configured behavior and instructions. We will set that up now.
+
+In **Terminal One**, run:
 
 ```bash
 cp add-ons/04-instructions/instructions.md my-agent/
@@ -163,6 +182,8 @@ cp add-ons/04-instructions/instructions.md my-agent/
 prompt, and it's where its judgment comes from.
 
 **Checkpoint:**
+
+In **Terminal Two**, re-run `uv run mda dev`, and chat with the agent:
 
 > Rename the "New game" button to "Restart". Don't open a pull request yet. Just make the change and tell me how you checked it.
 
@@ -177,6 +198,10 @@ It still says "New game". Each thread gets its own sandbox.
 
 ## Step 5: Connect it to GitHub (MCP connectors)
 
+At this point, our agent can write code, test it out in the sandbox, and follow the instructions we have specified for it. Now, we want the agent to connect to GitHub so as to draft PRs. The agent will connect to GitHub via MCP.
+
+
+In **Terminal One**, run:
 ```bash
 cp -R add-ons/05-tools/tools my-agent/
 cat add-ons/05-tools/instructions.md.append >> my-agent/instructions.md
@@ -185,10 +210,14 @@ cat add-ons/05-tools/instructions.md.append >> my-agent/instructions.md
 **TODO:** `tools/mcp.py`: list the GitHub tools Patch is allowed to use in
 `include_tools`.
 
+At minimum, be sure to include the following: `create_branch`, `push_files`, `create_pull_request`, `list_pull_requests`.
+
 There's no wiring: MDA finds `tools/mcp.py` by name. The appended *Tools*
 section tells Patch how to open a PR with those tools.
 
 **Checkpoint:**
+
+In **Terminal Two**, re-run `uv run mda dev`
 
 > What pull requests are open right now?
 
@@ -207,10 +236,9 @@ to change anything until step 6.
 
 ## Step 6: Approve before it acts (human-in-the-loop)
 
-Nothing to copy. This step is one argument in `agent.py`.
+At this point, the agent has a lot of power. We'll now aim to gate some of its capabilities, particularly its ability to create PRs, by configuring Human-in-the-loop.
 
-**TODO:** add `interrupt_on` to `define_deep_agent`, so the run pauses before
-Patch **opens a pull request**. Allow only `approve` and `reject`, because
+**TODO:** In `agent.py` add `interrupt_on` to `define_deep_agent`, so the run pauses before Patch **opens a pull request**. Allow only `approve` and `reject`, because
 those are the only decisions Slack supports:
 
 ```python
@@ -224,6 +252,8 @@ tools you allowed in step 5?
 
 **Checkpoint:**
 
+In **Terminal Two**, re-run `uv run mda dev`, and chat:
+
 > Add a key that toggles the ghost piece on and off. Use G. Then write a PR for it.
 
 The run pauses with Approve / Reject. Reject it once and confirm no PR opens.
@@ -233,6 +263,10 @@ fork.**
 ---
 
 ## Step 7: Teach it procedures (skills)
+
+Let's now set up some skills for the agent.
+
+In **Terminal One**, run
 
 ```bash
 cp -R add-ons/07-skills/skills my-agent/skills
@@ -262,6 +296,10 @@ inventing a fix.
 
 ## Step 8: Give it memory across conversations
 
+We'll now configure memory so that the agent can remember critical information at both a user-scope and an agent-scope.
+
+In **Terminal One**, run:
+
 ```bash
 cp add-ons/08-memory/memory.py my-agent/
 cat add-ons/08-memory/instructions.md.append >> my-agent/instructions.md
@@ -272,6 +310,8 @@ what goes in shared memory (`/memories/agent/`) and what goes in your private
 memory (`/memories/user/`).
 
 **Checkpoint:**
+
+Re-run `uv run mda dev` in **Terminal Two**, and send the agent the following:
 
 1. `From now on, open my PRs as drafts.` It saves this to
    `/memories/user/AGENTS.md`.
@@ -284,6 +324,10 @@ memory.
 ---
 
 ## Step 9: Ship it to Slack
+
+It's time to get the agent into Slack! 
+
+In **Terminal One**, run the following:
 
 ```bash
 mkdir -p my-agent/channels
@@ -300,8 +344,9 @@ Slack only works on a deployment, so now you deploy. From `my-agent/`:
 uv run mda deploy
 ```
 
-When the CLI prints a Slack authorization link, open it, pick the **webinar
-workspace**, approve, and return to the terminal. Then store your GitHub token
+You can choose to join the MDA [webinar slack workspace](https://join.slack.com/t/langchain-pmw7732/shared_invite/zt-4by2uw10m-MVupHxkp6osIwOxqT8~mqw), or utilize your own personal Slack workspace. This is where you can deploy your agent and interact with it. 
+
+When the CLI prints a Slack authorization link, open it, pick the desired workspace, approve, and return to the terminal. Then, in **Terminal Two** store your GitHub token
 in LangSmith and deploy again:
 
 ```bash
@@ -322,23 +367,23 @@ PR link and attaches the diff. Then, in the same Slack thread:
 
 The fix lands on the **same PR** as a second commit.
 
-*Want the full demo moment?* Plant a bug in your fork (see
-[Plant a bug](#plant-a-bug-optional)), screenshot it, and drop the screenshot
-into the DM. Patch reads the image from `/workspace/attachments/`.
-
 ---
 
 ## Step 10: Run it on a schedule
+
+Configure a schedule with your agent!
+
+In **Terminal One**, run:
 
 ```bash
 cp -R add-ons/10-schedule/schedules my-agent/
 ```
 
-**TODO:** make your own Slack channel (like `#patch-ada`), invite your bot to
-it, and put the channel's ID in `schedules/pr_roundup.py`.
+`pr_roundup.py` defines a schedule for the agent -- it will list the repository's open pull requests at the cadence specified by the cron expression. Configure the `cron` expression to your preference, and rewrite the `prompt` if you wish. 
 
-Schedules only run on a deployment, so `uv run mda deploy` again. Don't use
-`--no-wait`, because that skips setting up the schedule.
+If you are using the MDA webinar Slack workspace, you may set `conversation_id` to the value of `C0C6CAMRA9H`. When your agent runs at the scheduled time, it will post its response in the `#bot-party` channel.
+
+Schedules only run on a deployment, so `uv run mda deploy` again.
 
 **Checkpoint:** set `cron` to a few minutes ahead and redeploy. When it fires,
 the roundup of your fork's open PRs appears in your channel. Set `cron` back
@@ -356,19 +401,6 @@ afterward.
 - [ ] Your PR roundup posted to your Slack channel on its own
 
 ---
-
-## Plant a bug (optional)
-
-From a clone of your fork:
-
-```bash
-sed -i '' 's/Press P to resume/Press Space to resume/' index.html tetris.js   # on Linux: sed -i
-git commit -am "Update pause copy" && git push
-```
-
-Open `index.html` in a browser, start a game, press **P**, and screenshot the
-overlay. Send it to your Patch with: *"The pause screen tells me to press Space
-to resume, but Space doesn't unpause it."*
 
 ## Troubleshooting
 
