@@ -14,10 +14,6 @@ You build it the same way as the demo, one feature at a time:
 - [`solution/`](solution/) is the finished agent. Try each step yourself first,
   then compare.
 
-In MDA, a file's **location** turns a feature on. Adding `sandbox/` gives the
-agent a computer, and adding `memory.py` gives it memory. That's why you copy
-the pieces in one at a time instead of starting with all of them.
-
 For anything not covered here, see the
 [Managed Deep Agents docs](https://docs.langchain.com/langsmith/python/managed-deep-agents-overview).
 
@@ -25,9 +21,7 @@ For anything not covered here, see the
 
 ## What you need
 
-- A **LangSmith** account (US region) with Managed Deep Agents access, plus an
-  API key and your workspace ID. Use a workspace where you're an admin: step 9
-  creates a *connection*, which some roles can't do.
+- A **LangSmith API key**.
 - An **Anthropic API key**
 - [**uv**](https://docs.astral.sh/uv/getting-started/installation/)
 - A **GitHub** account
@@ -52,23 +46,20 @@ For anything not covered here, see the
    cp .env.example .env
    ```
    Fill in `LANGSMITH_API_KEY`, `ANTHROPIC_API_KEY`,
-   `PATCH_REPO` (your fork, like `octocat/simple-game`), and
+   `PATCH_REPO` (your fork, like `ishaan-lal/simple-game`), and
    `MDA_DEV_PATCH_GITHUB` (the token).
 
 ---
 
 ## How each step works
 
-Keep two terminals open: one in `takehome/` for copying (known henceforth as "**Terminal One**), and one in
+Keep two terminals open: one in `takehome/` for copying (known henceforth as **Terminal One**), and one in
 `takehome/my-agent/` for `uv run mda dev` (**Terminal Two**).
 
-1. **Copy** the step's add-on files into `my-agent/` (each step gives the
+1. **Copy** the step's add-on files into `my-agent/` (each step gives the copy
    commands).
 2. **Fill in the `TODO`s.** Every one is marked `TODO(step N)` and explains
-   what to write. To see what's left:
-   ```bash
-   grep -rn "TODO" my-agent --exclude-dir=.venv --exclude-dir=.mda
-   ```
+   what to write. 
 3. **Restart `mda dev`** (`Ctrl+C`, then `uv run mda dev`). New files are only
    picked up when it starts.
 4. **Run the checkpoint** query in Studio and check the trace. Start a **new
@@ -88,7 +79,7 @@ agent = define_deep_agent(
 )
 ```
 
-That's it. That means our agent is currently only a deep agent with a model and a harness. Nothing makes it special yet. We'll build up the MDA as we go.
+As it's defined, the agent is just a deep agent with a model and a harness. It has no customization yet. We'll build up the MDA as we go.
 
 **TODO:** in `my-agent/agent.py`, give your agent a `name`.
 
@@ -200,6 +191,14 @@ It still says "New game". Each thread gets its own sandbox.
 
 At this point, our agent can write code, test it out in the sandbox, and follow the instructions we have specified for it. Now, we want the agent to connect to GitHub so as to draft PRs. The agent will connect to GitHub via MCP.
 
+To get this appropriately configured, you will need a GitHub Personal Access Token (PAT), and to set `MDA_DEV_PATCH_GITHUB` in the `.env` file. To obtain the PAT:
+
+In GitHub, go to *Settings →
+   Developer settings → Fine-grained tokens → Generate new token*:
+   - *Repository access:* **Only select repositories** → your fork
+   - *Permissions:* **Contents** read and write, and **Pull requests** read and
+     write
+
 
 In **Terminal One**, run:
 ```bash
@@ -229,8 +228,6 @@ connection, which under `mda dev` reads `MDA_DEV_PATCH_GITHUB` from `.env`.
 
 This one uses `web__*` search, which LangSmith runs with no API key.
 
-⚠️ **Right now Patch can open PRs with nobody approving them.** Don't ask it
-to change anything until step 6.
 
 ---
 
@@ -344,7 +341,7 @@ Slack only works on a deployment, so now you deploy. From `my-agent/`:
 uv run mda deploy
 ```
 
-You can choose to join the MDA [webinar slack workspace](https://join.slack.com/t/langchain-pmw7732/shared_invite/zt-4by2uw10m-MVupHxkp6osIwOxqT8~mqw), or utilize your own personal Slack workspace. This is where you can deploy your agent and interact with it. 
+You can choose to utilize your own personal Slack workspace, or join the MDA [webinar slack workspace](https://join.slack.com/t/langchain-pmw7732/shared_invite/zt-4by2uw10m-MVupHxkp6osIwOxqT8~mqw). This is where you can deploy your agent and interact with it. 
 
 When the CLI prints a Slack authorization link, open it, pick the desired workspace, approve, and return to the terminal. Then, in **Terminal Two** store your GitHub token
 in LangSmith and deploy again:
@@ -391,16 +388,6 @@ afterward.
 
 ---
 
-## You're done when
-
-- [ ] `grep -rn "TODO" my-agent --exclude-dir=.venv --exclude-dir=.mda` prints
-      nothing
-- [ ] Your Patch opened a PR in **your fork** from a Slack message, after you
-      pressed **Approve** in Slack
-- [ ] A follow-up in the same Slack thread added a commit to that PR
-- [ ] Your PR roundup posted to your Slack channel on its own
-
----
 
 ## Troubleshooting
 
