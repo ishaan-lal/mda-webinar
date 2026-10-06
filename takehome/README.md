@@ -33,6 +33,7 @@ For anything not covered here, see the
 1. **Fork the game.** Fork
    [`ishaan-lal/simple-game`](https://github.com/ishaan-lal/simple-game) to
    your GitHub account. Patch only ever works on your fork.
+    **IMPORTANT: Fork the game repo. This is different from the current (take-home exercise) repo**.
 2. **Make a GitHub token for your fork only.** In GitHub, go to *Settings →
    Developer settings → Fine-grained tokens → Generate new token*:
    - *Repository access:* **Only select repositories** → your fork
@@ -44,8 +45,12 @@ For anything not covered here, see the
    cd my-agent
    uv sync
    cp .env.example .env
+   nano .env
    ```
-   Fill in `LANGSMITH_API_KEY`, `ANTHROPIC_API_KEY`,
+   You can also edit `.env` by opening the code in an IDE. 
+
+
+    Fill in `LANGSMITH_API_KEY`, `ANTHROPIC_API_KEY`,
    `PATCH_REPO` (your fork, like `ishaan-lal/simple-game`), and
    `MDA_DEV_PATCH_GITHUB` (the token).
 
