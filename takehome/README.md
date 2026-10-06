@@ -26,6 +26,8 @@ For anything not covered here, see the
 - [**uv**](https://docs.astral.sh/uv/getting-started/installation/)
 - A **GitHub** account
 
+**Important**: MDA deployments are only available for paid LangSmith accounts. If you do not have a LangSmith Plus account, you can create a fully-provisioned temporary workspace by following the instructions [here](https://docs.google.com/document/d/1-NX0y7IA4tpVn8hf9fyhPbRQaSBPB03kkym3QRKRk8g/edit?usp=sharing). 
+
 ---
 
 ## Setup
