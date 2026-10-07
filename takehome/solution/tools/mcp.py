@@ -8,18 +8,10 @@ from managed_deepagents import connections, define_mcp
 
 mcp = define_mcp(
     servers={
-        # GitHub's hosted MCP server. The token isn't in this project: it's the
-        # `patch-github` workspace connection, resolved at runtime ("agent" means
-        # one credential for every caller). Under `mda dev` it reads
-        # MDA_DEV_PATCH_GITHUB from .env instead.
-        #
-        # Scope the token to the one repo. The token, not the prompt, is what
-        # keeps Patch from touching anything else.
         "github": {
             "transport": "http",
             "url": "https://api.githubcopilot.com/mcp/",
-            "connection": connections.get("patch-github", {"type": "agent"}),
-            # GitHub's server has ~46 tools. Patch needs four.
+            "connection": connections.get("patch-github", {"type": "user"}),
             "include_tools": [
                 "create_branch",
                 "push_files",
