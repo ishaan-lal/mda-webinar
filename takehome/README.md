@@ -198,14 +198,6 @@ It still says "New game". Each thread gets its own sandbox.
 
 At this point, our agent can write code, test it out in the sandbox, and follow the instructions we have specified for it. Now, we want the agent to connect to GitHub so as to draft PRs. The agent will connect to GitHub via MCP.
 
-To get this appropriately configured, you will need a GitHub Personal Access Token (PAT), and to set `MDA_DEV_PATCH_GITHUB` in the `.env` file. To obtain the PAT:
-
-In GitHub, go to *Settings →
-   Developer settings → Fine-grained tokens → Generate new token*:
-   - *Repository access:* **Only select repositories** → your fork
-   - *Permissions:* **Contents** read and write, and **Pull requests** read and
-     write
-
 
 In **Terminal One**, run:
 ```bash
@@ -220,6 +212,20 @@ At minimum, be sure to include the following: `create_branch`, `push_files`, `cr
 
 There's no wiring: MDA finds `tools/mcp.py` by name. The appended *Tools*
 section tells Patch how to open a PR with those tools.
+
+**IMPORTANT**: The MCP uses a connection:
+```
+"connection": connections.get("patch-github", {"type": "user"})
+```
+
+We must define a connection so the agent can obtain a value. To do so, we will set up a user-scoped connection via OAuth.
+
+First, register a GitHub OAuth app [here](https://github.com/settings/developers), making sure to utilize the forked repository, and obtain the `CLIENT ID`. 
+
+Now, in **Terminal One**, run the following to create the connection:
+```bash
+uv run mda connections create patch-github --oauth github --client-id 
+```
 
 **Checkpoint:**
 
