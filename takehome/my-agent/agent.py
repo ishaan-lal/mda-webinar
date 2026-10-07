@@ -10,7 +10,7 @@ from managed_deepagents import define_deep_agent
 agent = define_deep_agent(
     # TODO(step 1): name your agent: letters, numbers, underscores, or hyphens,
     # starting with a letter. It becomes your deployment's name in LangSmith.
-    name="TODO",
+    name="TODO2",
     model="anthropic:claude-sonnet-5",
     # TODO(step 3): wire in the middleware (import it at the top, too).
     # TODO(step 6): pause before a pull request opens, with interrupt_on.

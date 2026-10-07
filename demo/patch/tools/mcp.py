@@ -11,7 +11,7 @@ mcp = define_mcp(
         "github": {
             "transport": "http",
             "url": "https://api.githubcopilot.com/mcp/",
-            "connection": connections.get("patch-github", {"type": "agent"}),
+            "connection": connections.get("patch-github", {"type": "user"}),
             "include_tools": [
                 "create_branch",
                 "push_files",
