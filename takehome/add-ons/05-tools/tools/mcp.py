@@ -12,7 +12,7 @@ mcp = define_mcp(
         "github": {
             "transport": "http",
             "url": "https://api.githubcopilot.com/mcp/",
-            "connection": connections.get("patch-github", {"type": "user"}),
+            "connection": connections.get("patch-github", {"type": "agent"}),
             # TODO(step 5): GitHub's server has ~46 tools. List ONLY the ones
             # Patch needs, by their raw MCP names. Patch has to be able to:
             #   - create a branch

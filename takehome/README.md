@@ -215,17 +215,13 @@ section tells Patch how to open a PR with those tools.
 
 **IMPORTANT**: The MCP uses a connection:
 ```
-"connection": connections.get("patch-github", {"type": "user"})
+"connection": connections.get("patch-github", {"type": "agent"})
 ```
 
-We must define a connection so the agent can obtain a value. To do so, we will set up a user-scoped connection via OAuth.
-
-First, register a GitHub OAuth app [here](https://github.com/settings/developers), making sure to utilize the forked repository, and obtain the `CLIENT ID`. 
-
-Now, in **Terminal One**, run the following to create the connection:
-```bash
-uv run mda connections create patch-github --oauth github --client-id 
-```
+`"agent"` means one GitHub credential shared by every caller: the token you
+made in Setup. Under `mda dev`, the connection reads it from
+`MDA_DEV_PATCH_GITHUB` in `.env`, so there's nothing else to set up yet. You'll
+store it in LangSmith when you deploy in step 9.
 
 **Checkpoint:**
 
