@@ -1,6 +1,6 @@
-# Managed Deep Agents Take-home: Build your own Patch
+# Managed Agents Take-home: Build your own Patch
 
-In the webinar you watched **Patch** get built: a Managed Deep Agent (MDA) that
+In the webinar you watched **Patch** get built: a Managed Agent that
 lives in Slack, fixes bugs in a small browser game, and opens pull requests,
 asking a human to approve first. Now you build your own. It works on **your
 fork** of the game and lives in the webinar's Slack workspace.
@@ -15,7 +15,7 @@ You build it the same way as the demo, one feature at a time:
   then compare.
 
 For anything not covered here, see the
-[Managed Deep Agents docs](https://docs.langchain.com/langsmith/python/managed-deep-agents-overview).
+[Managed Agents docs](https://docs.langchain.com/langsmith/python/managed-deep-agents-overview).
 
 ---
 
@@ -26,7 +26,7 @@ For anything not covered here, see the
 - [**uv**](https://docs.astral.sh/uv/getting-started/installation/)
 - A **GitHub** account
 
-**Important**: MDA deployments are only available for paid LangSmith accounts. If you do not have a LangSmith Plus account, you can create a fully-provisioned temporary workspace by following the instructions [here](https://docs.google.com/document/d/1-NX0y7IA4tpVn8hf9fyhPbRQaSBPB03kkym3QRKRk8g/edit?usp=sharing). 
+**Important**: Managed Agents deployments are only available for paid LangSmith accounts. If you do not have a LangSmith Plus account, you can create a fully-provisioned temporary workspace by following the instructions [here](https://docs.google.com/document/d/1-NX0y7IA4tpVn8hf9fyhPbRQaSBPB03kkym3QRKRk8g/edit?usp=sharing). 
 
 ---
 
@@ -86,7 +86,7 @@ agent = define_deep_agent(
 )
 ```
 
-As it's defined, the agent is just a deep agent with a model and a harness. It has no customization yet. We'll build up the MDA as we go.
+As it's defined, the agent is just a deep agent with a model and a harness. It has no customization yet. We'll build up the managed agent as we go.
 
 **TODO:** in `my-agent/agent.py`, give your agent a `name`.
 
@@ -210,7 +210,7 @@ cat add-ons/05-tools/instructions.md.append >> my-agent/instructions.md
 
 At minimum, be sure to include the following: `create_branch`, `push_files`, `create_pull_request`, `list_pull_requests`.
 
-There's no wiring: MDA finds `tools/mcp.py` by name. The appended *Tools*
+There's no wiring: The deployment finds `tools/mcp.py` by name. The appended *Tools*
 section tells Patch how to open a PR with those tools.
 
 **IMPORTANT**: The MCP uses a connection:
@@ -341,16 +341,13 @@ cp add-ons/09-slack/channels/slack.py my-agent/channels/
 cat add-ons/09-slack/instructions.md.append >> my-agent/instructions.md
 ```
 
-**TODO:** in `channels/slack.py`, give your bot a name everyone can tell apart
-(`Patch-<your name>`) and a description.
+**TODO:** in `channels/slack.py`, give your bot a name.
 
 Slack only works on a deployment, so now you deploy. From `my-agent/`:
 
 ```bash
 uv run mda deploy
 ```
-
-You can choose to utilize your own personal Slack workspace, or join the MDA [webinar slack workspace](https://join.slack.com/t/langchain-pmw7732/shared_invite/zt-4by2uw10m-MVupHxkp6osIwOxqT8~mqw). This is where you can deploy your agent and interact with it. 
 
 When the CLI prints a Slack authorization link, open it, pick the desired workspace, approve, and return to the terminal. Then, in **Terminal Two** store your GitHub token
 in LangSmith and deploy again:
@@ -387,7 +384,7 @@ cp -R add-ons/10-schedule/schedules my-agent/
 
 `pr_roundup.py` defines a schedule for the agent -- it will list the repository's open pull requests at the cadence specified by the cron expression. Configure the `cron` expression to your preference, and rewrite the `prompt` if you wish. 
 
-If you are using the MDA webinar Slack workspace, you may set `conversation_id` to the value of `C0C6CAMRA9H`. When your agent runs at the scheduled time, it will post its response in the `#bot-party` channel.
+The `conversation_id` is found by opening a slack channel and clicking on its details.
 
 Schedules only run on a deployment, so `uv run mda deploy` again.
 

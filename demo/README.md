@@ -1,6 +1,6 @@
 # Demo: Building Patch
 
-**Patch** is a [Managed Deep Agent](https://docs.langchain.com/langsmith/python/managed-deep-agents-overview)
+**Patch** is a [Managed Agent](https://docs.langchain.com/langsmith/python/managed-deep-agents-overview)
 that lives in Slack, fixes bugs in a small browser game, and opens pull requests
 after a human approves them. In the webinar it's built live, one feature at a time.
 

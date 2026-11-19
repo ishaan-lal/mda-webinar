@@ -1,4 +1,4 @@
-# Managed Deep Agents Workshop
+# Managed Agents Workshop
 
 `demo` contains the files for the live demo.
 
